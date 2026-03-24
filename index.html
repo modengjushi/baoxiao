@@ -70,6 +70,13 @@
         .city-item:hover {
             background: #f0f0f0;
         }
+        #monthSelect {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
         button {
             width: 100%;
             padding: 12px;
@@ -118,8 +125,26 @@
         </div>
     </div>
 
-    <button onclick="search()">立即查询报销标准</button>
+    <!-- 新增：月份选择器 -->
+    <div class="form-item">
+        <label>选择查询月份</label>
+        <select id="monthSelect">
+            <option value="1">1月</option>
+            <option value="2">2月</option>
+            <option value="3">3月</option>
+            <option value="4">4月</option>
+            <option value="5">5月</option>
+            <option value="6">6月</option>
+            <option value="7">7月</option>
+            <option value="8">8月</option>
+            <option value="9">9月</option>
+            <option value="10">10月</option>
+            <option value="11">11月</option>
+            <option value="12">12月</option>
+        </select>
+    </div>
 
+    <button onclick="search()">立即查询报销标准</button>
     <div class="result" id="result"></div>
 </div>
 
@@ -339,11 +364,17 @@ const cityData = {
 
 const cityList = Object.entries(cityData).map(([code, info]) => ({ code, name: info.name }));
 const now = new Date();
-const currentMonth = now.getMonth() + 1;
+const currentMonth = now.getMonth() + 1; // 当前月份
 let selectedCityCode = null;
+
 const searchInput = document.getElementById('citySearch');
 const dropdown = document.getElementById('cityDropdown');
+const monthSelect = document.getElementById('monthSelect');
 
+// 默认选中当前月份
+monthSelect.value = currentMonth;
+
+// 城市搜索
 searchInput.addEventListener('input', function () {
     const keyword = this.value.trim();
     if (!keyword) { dropdown.style.display = 'none'; selectedCityCode = null; return; }
@@ -354,7 +385,11 @@ searchInput.addEventListener('input', function () {
         const div = document.createElement('div');
         div.className = 'city-item';
         div.textContent = c.name;
-        div.onclick = () => { searchInput.value = c.name; selectedCityCode = c.code; dropdown.style.display = 'none'; };
+        div.onclick = () => {
+            searchInput.value = c.name;
+            selectedCityCode = c.code;
+            dropdown.style.display = 'none';
+        };
         dropdown.appendChild(div);
     });
     dropdown.style.display = 'block';
@@ -364,23 +399,46 @@ document.addEventListener('click', function (e) {
     if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
 });
 
+// 查询逻辑（支持选择月份）
 function search() {
     const resBox = document.getElementById('result');
-    if (!selectedCityCode) { resBox.className = 'result show'; resBox.innerHTML = '⚠️ 请先搜索并选择城市'; return; }
+    if (!selectedCityCode) {
+        resBox.className = 'result show';
+        resBox.innerHTML = '⚠️ 请先搜索并选择城市';
+        return;
+    }
+
     const data = cityData[selectedCityCode];
-    const monthText = `${currentMonth} 月`;
+    const queryMonth = parseInt(monthSelect.value);
+    const monthText = `${queryMonth}月`;
     let html = '';
+
     if (!data.peak) {
         resBox.className = 'result show normal';
-        html = `<strong>🏙️ ${data.name}</strong><br><strong>📅 当前月份：${monthText}</strong><br>住宿费标准：<strong>${data.base} 元/人·天</strong><br>无旺季浮动`;
+        html = `
+            <strong>🏙️ ${data.name}</strong><br>
+            <strong>📅 查询月份：${monthText}</strong><br>
+            住宿费标准：<strong>${data.base} 元/人·天</strong><br>
+            无旺季浮动
+        `;
     } else {
-        const isPeak = data.peakMonths.includes(currentMonth);
+        const isPeak = data.peakMonths.includes(queryMonth);
         if (isPeak) {
             resBox.className = 'result show peak';
-            html = `<strong>🏙️ ${data.name}</strong><br><strong>📅 当前月份：${monthText}</strong><br>基础标准：${data.base} 元<br>📅 当前为<strong>旺季</strong>，执行：<strong>${data.peakPrice} 元/人·天</strong>`;
+            html = `
+                <strong>🏙️ ${data.name}</strong><br>
+                <strong>📅 查询月份：${monthText}</strong><br>
+                基础标准：${data.base} 元<br>
+                📅 当前为<strong>旺季</strong>，执行：<strong>${data.peakPrice} 元/人·天</strong>
+            `;
         } else {
             resBox.className = 'result show normal';
-            html = `<strong>🏙️ ${data.name}</strong><br><strong>📅 当前月份：${monthText}</strong><br>当前非旺季<br>执行标准：<strong>${data.base} 元/人·天</strong>`;
+            html = `
+                <strong>🏙️ ${data.name}</strong><br>
+                <strong>📅 查询月份：${monthText}</strong><br>
+                当前非旺季<br>
+                执行标准：<strong>${data.base} 元/人·天</strong>
+            `;
         }
     }
     resBox.innerHTML = html;
