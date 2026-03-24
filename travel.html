@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>差旅住宿费报销标准查询</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-size: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 15px;
+            background: #f5f7fa;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-item {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 500;
+        }
+        .search-select-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        #citySearch {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        #cityDropdown {
+            position: absolute;
+            top: 45px;
+            left: 0;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            z-index: 100;
+            display: none;
+        }
+        .city-item {
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+        .city-item:hover {
+            background: #f0f0f0;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:active {
+            background: #0069d9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 8px;
+            display: none;
+            line-height: 1.6;
+        }
+        .result.show {
+            display: block;
+        }
+        .normal {
+            border: 1px solid #28a745;
+            background: #f8fff9;
+        }
+        .peak {
+            border: 1px solid #ff7c38;
+            background: #fff9f5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="title">差旅住宿费报销标准查询</div>
+
+    <div class="form-item">
+        <label>选择城市（可搜索）</label>
+        <div class="search-select-wrapper">
+            <input type="text" id="citySearch" placeholder="输入城市名搜索..." autocomplete="off">
+            <div id="cityDropdown"></div>
+        </div>
+    </div>
+
+    <button onclick="search()">立即查询报销标准</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+const cityData = {
+    beijing: { name: "北京", base: 500, peak: false },
+    tianjin_center: { name: "天津（中心城区）", base: 380, peak: false },
+    tianjin_ninghe: { name: "天津（宁河区）", base: 320, peak: false },
+    shijiazhuang: { name: "石家庄", base: 350, peak: false },
+    qinhuangdao: { name: "秦皇岛", base: 350, peak: false },
+    zhangjiakou: { name: "张家口", base: 450, peak: true, peakMonths: [7,8,9,11,12,1,2,3], peakPrice: 525 },
+    chengde: { name: "承德", base: 350, peak: false },
+    taiyuan: { name: "太原", base: 350, peak: false },
+    datong: { name: "大同", base: 350, peak: false },
+    jinzhong: { name: "晋中", base: 350, peak: false },
+    hohhot: { name: "呼和浩特", base: 350, peak: false },
+    baotou: { name: "包头", base: 350, peak: false },
+    wuhai: { name: "乌海", base: 350, peak: false },
+    chifeng: { name: "赤峰", base: 350, peak: false },
+    shenyang: { name: "沈阳", base: 350, peak: false },
+    dalian: { name: "大连", base: 380, peak: false },
+    anshan: { name: "鞍山", base: 350, peak: false },
+    fushun: { name: "抚顺", base: 350, peak: false },
+    benxi: { name: "本溪", base: 350, peak: false },
+    changchun: { name: "长春", base: 350, peak: false },
+    jilin_city: { name: "吉林", base: 350, peak: false },
+    yanji: { name: "延吉", base: 350, peak: false },
+    harbin: { name: "哈尔滨", base: 350, peak: false },
+    qiqihaer: { name: "齐齐哈尔", base: 350, peak: false },
+    mudanjiang: { name: "牡丹江", base: 350, peak: false },
+    shanghai: { name: "上海", base: 500, peak: false },
+    nanjing: { name: "南京", base: 380, peak: false },
+    suzhou: { name: "苏州", base: 380, peak: false },
+    wuxi: { name: "无锡", base: 380, peak: false },
+    nantong: { name: "南通", base: 380, peak: false },
+    hangzhou: { name: "杭州", base: 400, peak: false },
+    ningbo: { name: "宁波", base: 400, peak: false },
+    wenzhou: { name: "温州", base: 400, peak: false },
+    jiaxing: { name: "嘉兴", base: 400, peak: false },
+    huzhou: { name: "湖州", base: 400, peak: false },
+    shaoxing: { name: "绍兴", base: 400, peak: false },
+    taizhou_zhejiang: { name: "台州", base: 400, peak: false },
+    hefei: { name: "合肥", base: 350, peak: false },
+    wuhu: { name: "芜湖", base: 350, peak: false },
+    maanshan: { name: "马鞍山", base: 350, peak: false },
+    fuzhou_fujian: { name: "福州", base: 380, peak: false },
+    xiamen: { name: "厦门", base: 400, peak: false },
+    putian: { name: "莆田", base: 380, peak: false },
+    sanming: { name: "三明", base: 380, peak: false },
+    quanzhou: { name: "泉州", base: 380, peak: false },
+    zhangzhou: { name: "漳州", base: 380, peak: false },
+    nanping: { name: "南平", base: 380, peak: false },
+    longyan: { name: "龙岩", base: 380, peak: false },
+    ningde: { name: "宁德", base: 380, peak: false },
+    nanchang: { name: "南昌", base: 350, peak: false },
+    jingdezhen: { name: "景德镇", base: 350, peak: false },
+    pingxiang: { name: "萍乡", base: 350, peak: false },
+    jiujiang: { name: "九江", base: 350, peak: false },
+    jian_jianxi: { name: "吉安", base: 350, peak: false },
+    yichun_jiangxi: { name: "宜春", base: 350, peak: false },
+    jinan: { name: "济南", base: 380, peak: false },
+    qingdao: { name: "青岛", base: 380, peak: false },
+    zibo: { name: "淄博", base: 380, peak: false },
+    zaozhuang: { name: "枣庄", base: 380, peak: false },
+    dongying: { name: "东营", base: 380, peak: false },
+    yantai: { name: "烟台", base: 380, peak: false },
+    weifang: { name: "潍坊", base: 380, peak: false },
+    jining: { name: "济宁", base: 380, peak: false },
+    taian: { name: "泰安", base: 380, peak: false },
+    weihai: { name: "威海", base: 380, peak: false },
+    rizhao: { name: "日照", base: 380, peak: false },
+    linyi: { name: "临沂", base: 380, peak: false },
+    dezhou: { name: "德州", base: 380, peak: false },
+    liaocheng: { name: "聊城", base: 380, peak: false },
+    binzhou: { name: "滨州", base: 380, peak: false },
+    heze: { name: "菏泽", base: 380, peak: false },
+    zhengzhou: { name: "郑州", base: 380, peak: false },
+    kaifeng: { name: "开封", base: 380, peak: false },
+    luoyang: { name: "洛阳", base: 380, peak: false },
+    pingdingshan: { name: "平顶山", base: 380, peak: false },
+    anyang: { name: "安阳", base: 380, peak: false },
+    hebi: { name: "鹤壁", base: 380, peak: false },
+    xinxiang: { name: "新乡", base: 380, peak: false },
+    jiaozuo: { name: "焦作", base: 380, peak: false },
+    puyang: { name: "濮阳", base: 380, peak: false },
+    xuchang: { name: "许昌", base: 380, peak: false },
+    luohe: { name: "漯河", base: 380, peak: false },
+    sanmenxia: { name: "三门峡", base: 380, peak: false },
+    nanyang: { name: "南阳", base: 380, peak: false },
+    shangqiu: { name: "商丘", base: 380, peak: false },
+    xinyang: { name: "信阳", base: 380, peak: false },
+    zhoukou: { name: "周口", base: 380, peak: false },
+    zhumadian: { name: "驻马店", base: 380, peak: false },
+    wuhan: { name: "武汉", base: 380, peak: false },
+    huangshi: { name: "黄石", base: 380, peak: false },
+    shiyan: { name: "十堰", base: 380, peak: false },
+    yichang: { name: "宜昌", base: 380, peak: false },
+    xiangyang: { name: "襄阳", base: 380, peak: false },
+    ezhou: { name: "鄂州", base: 380, peak: false },
+    jingmen: { name: "荆门", base: 380, peak: false },
+    xiaogan: { name: "孝感", base: 380, peak: false },
+    jinzhou_hubei: { name: "荆州", base: 380, peak: false },
+    huanggang: { name: "黄冈", base: 380, peak: false },
+    xianning: { name: "咸宁", base: 380, peak: false },
+    suizhou: { name: "随州", base: 380, peak: false },
+    changsha: { name: "长沙", base: 380, peak: false },
+    zhuzhou: { name: "株洲", base: 380, peak: false },
+    xiangtan: { name: "湘潭", base: 380, peak: false },
+    hengyang: { name: "衡阳", base: 380, peak: false },
+    shaoyang: { name: "邵阳", base: 380, peak: false },
+    yueyang: { name: "岳阳", base: 380, peak: false },
+    changde: { name: "常德", base: 380, peak: false },
+    zhangjiajie: { name: "张家界", base: 380, peak: false },
+    yiyang: { name: "益阳", base: 380, peak: false },
+    chenzhou: { name: "郴州", base: 380, peak: false },
+    yongzhou: { name: "永州", base: 380, peak: false },
+    huaihua: { name: "怀化", base: 380, peak: false },
+    loudi: { name: "娄底", base: 380, peak: false },
+    guangzhou: { name: "广州", base: 450, peak: false },
+    shenzhen: { name: "深圳", base: 450, peak: false },
+    zhuhai: { name: "珠海", base: 450, peak: false },
+    shantou: { name: "汕头", base: 450, peak: false },
+    foshan: { name: "佛山", base: 450, peak: false },
+    shaoguan: { name: "韶关", base: 450, peak: false },
+    zhanjiang: { name: "湛江", base: 450, peak: false },
+    maoming: { name: "茂名", base: 450, peak: false },
+    zhaoqing: { name: "肇庆", base: 450, peak: false },
+    huizhou: { name: "惠州", base: 450, peak: false },
+    meizhou: { name: "梅州", base: 450, peak: false },
+    shanwei: { name: "汕尾", base: 450, peak: false },
+    heyuan: { name: "河源", base: 450, peak: false },
+    yangjiang: { name: "阳江", base: 450, peak: false },
+    qingyuan: { name: "清远", base: 450, peak: false },
+    dongguan: { name: "东莞", base: 450, peak: false },
+    zhongshan: { name: "中山", base: 450, peak: false },
+    chaozhou: { name: "潮州", base: 450, peak: false },
+    jieyang: { name: "揭阳", base: 450, peak: false },
+    yunfu: { name: "云浮", base: 450, peak: false },
+    nanning: { name: "南宁", base: 380, peak: false },
+    liuzhou: { name: "柳州", base: 380, peak: false },
+    guilin: { name: "桂林", base: 380, peak: false },
+    wuzhou: { name: "梧州", base: 380, peak: false },
+    beihai: { name: "北海", base: 380, peak: false },
+    fangchenggang: { name: "防城港", base: 380, peak: false },
+    qinzhou: { name: "钦州", base: 380, peak: false },
+    guigang: { name: "贵港", base: 380, peak: false },
+    yulin_guangxi: { name: "玉林", base: 380, peak: false },
+    baise: { name: "百色", base: 380, peak: false },
+    hezhou: { name: "贺州", base: 380, peak: false },
+    hechi: { name: "河池", base: 380, peak: false },
+    laibin: { name: "来宾", base: 380, peak: false },
+    chongzuo: { name: "崇左", base: 380, peak: false },
+    haikou: { name: "海口", base: 400, peak: false },
+    sanya: { name: "三亚", base: 400, peak: true, peakMonths: [10,11,12,1,2,3,4], peakPrice: 480 },
+    chengdu: { name: "成都", base: 380, peak: false },
+    zigong: { name: "自贡", base: 380, peak: false },
+    panzhihua: { name: "攀枝花", base: 380, peak: false },
+    luzhou: { name: "泸州", base: 380, peak: false },
+    deyang: { name: "德阳", base: 380, peak: false },
+    mianyang: { name: "绵阳", base: 380, peak: false },
+    guangyuan: { name: "广元", base: 380, peak: false },
+    suining: { name: "遂宁", base: 380, peak: false },
+    neijiang: { name: "内江", base: 380, peak: false },
+    leshan: { name: "乐山", base: 380, peak: false },
+    nanchong: { name: "南充", base: 380, peak: false },
+    meishan: { name: "眉山", base: 380, peak: false },
+    yibin: { name: "宜宾", base: 380, peak: false },
+    guangan: { name: "广安", base: 380, peak: false },
+    dazhou: { name: "达州", base: 380, peak: false },
+    yaan: { name: "雅安", base: 380, peak: false },
+    bazhong: { name: "巴中", base: 380, peak: false },
+    ziyang: { name: "资阳", base: 380, peak: false },
+    guiyang: { name: "贵阳", base: 380, peak: false },
+    liupanshui: { name: "六盘水", base: 380, peak: false },
+    zunyi: { name: "遵义", base: 380, peak: false },
+    anshun: { name: "安顺", base: 380, peak: false },
+    kunming: { name: "昆明", base: 380, peak: false },
+    qujing: { name: "曲靖", base: 380, peak: false },
+    yuxi: { name: "玉溪", base: 380, peak: false },
+    baoshan: { name: "保山", base: 380, peak: false },
+    zhaotong: { name: "昭通", base: 380, peak: false },
+    lijiang: { name: "丽江", base: 380, peak: false },
+    puer: { name: "普洱", base: 380, peak: false },
+    lincang: { name: "临沧", base: 380, peak: false },
+    lasa: { name: "拉萨", base: 420, peak: true, peakMonths: [6,7,8,9], peakPrice: 530 },
+    xian: { name: "西安", base: 380, peak: false },
+    tongchuan: { name: "铜川", base: 380, peak: false },
+    baoji: { name: "宝鸡", base: 380, peak: false },
+    xianyang: { name: "咸阳", base: 380, peak: false },
+    weinan: { name: "渭南", base: 380, peak: false },
+    yanan: { name: "延安", base: 380, peak: false },
+    hanzhong: { name: "汉中", base: 380, peak: false },
+    yulin_shanxi: { name: "榆林", base: 380, peak: false },
+    ankang: { name: "安康", base: 380, peak: false },
+    shangluo: { name: "商洛", base: 380, peak: false },
+    lanzhou: { name: "兰州", base: 380, peak: false },
+    jiayuguan: { name: "嘉峪关", base: 380, peak: false },
+    jinchang: { name: "金昌", base: 380, peak: false },
+    baiyin: { name: "白银", base: 380, peak: false },
+    tianshui: { name: "天水", base: 380, peak: false },
+    wuwei: { name: "武威", base: 380, peak: false },
+    zhangye: { name: "张掖", base: 380, peak: false },
+    pingliang: { name: "平凉", base: 380, peak: false },
+    qingyang: { name: "庆阳", base: 380, peak: false },
+    dingxi: { name: "定西", base: 380, peak: false },
+    longnan: { name: "陇南", base: 380, peak: false },
+    xining: { name: "西宁", base: 380, peak: false },
+    yinchuan: { name: "银川", base: 380, peak: false },
+    wuzhong: { name: "吴忠", base: 380, peak: false },
+    guyuan: { name: "固原", base: 380, peak: false },
+    zhongwei: { name: "中卫", base: 380, peak: false },
+    urumqi: { name: "乌鲁木齐", base: 380, peak: false },
+    kelamayi: { name: "克拉玛依", base: 380, peak: false },
+    turpan: { name: "吐鲁番", base: 380, peak: false },
+    hami: { name: "哈密", base: 380, peak: false }
+};
+
+const cityList = Object.entries(cityData).map(([code, info]) => ({ code, name: info.name }));
+const now = new Date();
+const currentMonth = now.getMonth() + 1;
+let selectedCityCode = null;
+const searchInput = document.getElementById('citySearch');
+const dropdown = document.getElementById('cityDropdown');
+
+searchInput.addEventListener('input', function () {
+    const keyword = this.value.trim();
+    if (!keyword) { dropdown.style.display = 'none'; selectedCityCode = null; return; }
+    const filtered = cityList.filter(c => c.name.includes(keyword));
+    dropdown.innerHTML = '';
+    if (filtered.length === 0) { dropdown.style.display = 'none'; return; }
+    filtered.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'city-item';
+        div.textContent = c.name;
+        div.onclick = () => { searchInput.value = c.name; selectedCityCode = c.code; dropdown.style.display = 'none'; };
+        dropdown.appendChild(div);
+    });
+    dropdown.style.display = 'block';
+});
+
+document.addEventListener('click', function (e) {
+    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
+});
+
+function search() {
+    const resBox = document.getElementById('result');
+    if (!selectedCityCode) { resBox.className = 'result show'; resBox.innerHTML = '⚠️ 请先搜索并选择城市'; return; }
+    const data = cityData[selectedCityCode];
+    const monthText = `${currentMonth} 月`;
+    let html = '';
+    if (!data.peak) {
+        resBox.className = 'result show normal';
+        html = `<strong>🏙️ ${data.name}</strong><br><strong>📅 当前月份：${monthText}</strong><br>住宿费标准：<strong>${data.base} 元/人·天</strong><br>无旺季浮动`;
+    } else {
+        const isPeak = data.peakMonths.includes(currentMonth);
+        if (isPeak) {
+            resBox.className = 'result show peak';
+            html = `<strong>🏙️ ${data.name}</strong><br><strong>📅 当前月份：${monthText}</strong><br>基础标准：${data.base} 元<br>📅 当前为<strong>旺季</strong>，执行：<strong>${data.peakPrice} 元/人·天</strong>`;
+        } else {
+            resBox.className = 'result show normal';
+            html = `<strong>🏙️ ${data.name}</strong><br><strong>📅 当前月份：${monthText}</strong><br>当前非旺季<br>执行标准：<strong>${data.base} 元/人·天</strong>`;
+        }
+    }
+    resBox.innerHTML = html;
+}
+</script>
+</body>
+</html>
