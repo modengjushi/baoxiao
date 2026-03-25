@@ -261,7 +261,21 @@ const cityData = {
     lishui: { name: "丽水", base: 340, peak: false },
 
     hefei: { name: "合肥", base: 350, peak: false },
-    anhui: { name: "安徽全省", base: 350, peak: false },
+    wuhu: { name: "芜湖", base: 350, peak: false },
+    maanshan: { name: "马鞍山", base: 350, peak: false },
+    bengbu: { name: "蚌埠", base: 350, peak: false },
+    huainan: { name: "淮南", base: 350, peak: false },
+    huaibei: { name: "淮北", base: 350, peak: false },
+    tongling: { name: "铜陵", base: 350, peak: false },
+    chizhou: { name: "池州", base: 350, peak: false },
+    xuancheng: { name: "宣城", base: 350, peak: false },
+    bozhou_anhui: { name: "亳州", base: 350, peak: false },
+    fuyang: { name: "阜阳", base: 350, peak: false },
+    chuzhou: { name: "滁州", base: 350, peak: false },
+    liuan: { name: "六安", base: 350, peak: false },
+    anqing: { name: "安庆", base: 350, peak: false },
+    huangshan: { name: "黄山", base: 350, peak: false },
+    suzhou_anhui: { name: "宿州", base: 350, peak: false },
 
     fuzhou: { name: "福州", base: 380, peak: false },
     quanzhou: { name: "泉州", base: 380, peak: false },
@@ -291,11 +305,12 @@ const cityData = {
     yantai: { name: "烟台", base: 380, peak: true, peakMonths: [7,8,9], peakPrice: 450 },
     weihai: { name: "威海", base: 380, peak: true, peakMonths: [7,8,9], peakPrice: 450 },
     rizhao: { name: "日照", base: 380, peak: true, peakMonths: [7,8,9], peakPrice: 450 },
-    zibo: { name: "淄博", base: 360, peak: false },
-    zaozhuang: { name: "枣庄", base: 360, peak: false },
-    dongying: { name: "东营", base: 360, peak: false },
-    weifang: { name: "潍坊", base: 360, peak: false },
-    jining: { name: "济宁", base: 360, peak: false },
+    zibo: { name: "淄博", base: 380, peak: false },
+    zaozhuang: { name: "枣庄", base: 380, peak: false },
+    dongying: { name: "东营", base: 380, peak: false },
+    weifang: { name: "潍坊", base: 380, peak: false },
+    jining: { name: "济宁", base: 380, peak: false },
+    taian: { name: "泰安", base: 380, peak: false },
     linyi: { name: "临沂", base: 360, peak: false },
     dezhou: { name: "德州", base: 360, peak: false },
     liaocheng: { name: "聊城", base: 360, peak: false },
@@ -380,7 +395,7 @@ const cityData = {
     qinzhou: { name: "钦州", base: 330, peak: false },
     guigang: { name: "贵港", base: 330, peak: false },
     yulin_guangxi: { name: "玉林", base: 330, peak: false },
-    baise: { name: "白色", base: 330, peak: false },
+    baise: { name: "百色", base: 330, peak: false },
     hechi: { name: "河池", base: 330, peak: false },
     hezhou: { name: "贺州", base: 330, peak: false },
     laibin: { name: "来宾", base: 330, peak: false },
@@ -391,6 +406,9 @@ const cityData = {
     wuzhishan: { name: "五指山", base: 350, peak: false },
     danzhou: { name: "儋州", base: 350, peak: false },
     wenchang: { name: "文昌", base: 350, peak: true, peakMonths: [11,12,1,2], peakPrice: 450 },
+
+    chongqing_center: { name: "重庆（中心城区）", base: 370, peak: false },
+    chongqing_other: { name: "重庆（其他地区）", base: 300, peak: false },
 
     chengdu: { name: "成都", base: 370, peak: false },
     aba: { name: "阿坝", base: 330, peak: false },
@@ -446,6 +464,7 @@ const cityData = {
     xian: { name: "西安", base: 350, peak: false },
     yulin_shanxi: { name: "榆林", base: 300, peak: false },
     yanan: { name: "延安", base: 300, peak: false },
+    yangling: { name: "杨凌", base: 260, peak: false },
     xianyang: { name: "咸阳", base: 260, peak: false },
     baoji: { name: "宝鸡", base: 260, peak: false },
     weinan: { name: "渭南", base: 260, peak: false },
@@ -505,14 +524,20 @@ const cityData = {
     hainan_wanning: { name: "万宁", base: 350, peak: true, peakMonths: [11,12,1,2,3], peakPrice: 450 },
     hainan_lingshui: { name: "陵水", base: 350, peak: true, peakMonths: [11,12,1,2,3], peakPrice: 450 },
     hainan_baoting: { name: "保亭", base: 350, peak: true, peakMonths: [11,12,1,2,3], peakPrice: 450 },
-    hainan_wenchang: { name: "文昌", base: 350, peak: true, peakMonths: [11,12,1,2], peakPrice: 450 },
+    hainan_qiongzhong: { name: "琼中", base: 350, peak: true, peakMonths: [11,12,1,2,3], peakPrice: 450 },
     hainan_chengmai: { name: "澄迈", base: 350, peak: true, peakMonths: [11,12,1,2], peakPrice: 450 },
-    
+    hainan_dongfang: { name: "东方", base: 350, peak: false },
+    hainan_dingan: { name: "定安", base: 350, peak: false },
+    hainan_tunchang: { name: "屯昌", base: 350, peak: false },
+    hainan_lingao: { name: "临高", base: 350, peak: false },
+    hainan_baisha: { name: "白沙", base: 350, peak: false },
+    hainan_changjiang: { name: "昌江", base: 350, peak: false },
+    hainan_ledong: { name: "乐东", base: 350, peak: false },
+    hainan_yangpu: { name: "洋浦", base: 350, peak: false },
+
     // 西藏城市
     linzhi: { name: "林芝", base: 300, peak: true, peakMonths: [6,7,8,9], peakPrice: 350 },
-    shigatse: { name: "日喀则", base: 300, peak: true, peakMonths: [6,7,8,9], peakPrice: 350 },
-    naqu: { name: "那曲", base: 300, peak: true, peakMonths: [6,7,8,9], peakPrice: 350 },
-    ali: { name: "阿里", base: 300, peak: true, peakMonths: [6,7,8,9], peakPrice: 350 }
+    shigatse: { name: "日喀则", base: 300, peak: true, peakMonths: [6,7,8,9], peakPrice: 350 }
 };
 
 const cityList = Object.entries(cityData).map(([code, info]) => ({ code, name: info.name }));
